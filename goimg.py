@@ -48,12 +48,16 @@ class GoogleImageDownloader():
         return keywords
 
 
+    def run(self):
+        keywords = self.inputValues()
+        self.getParams(keywords)
+
+
 
 
 def main():
     google_down = GoogleImageDownloader()
-    keywords = google_down.inputValues()
-    google_down.getParams(keywords)
+    google_down.run()
 
 if __name__ == "__main__":
     try:
