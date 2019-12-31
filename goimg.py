@@ -1,67 +1,56 @@
 import os
-import sys
 from google_images_download import google_images_download
 
 
-class GoogleImageDownloader():
+keyword = input("> Enter keyword:")
+while not keyword:
+    keyword = input("> Enter keyword:")
 
-    def getParams(self, keywords):
-        google = google_images_download.googleimagesdownload()
+print("> 0:jpg, 1:gif, 2:png")
+img_format = ["jpg", "gif", "png"]
+img_format_num = input("> Select number(0~2):")
+while not img_format_num:
+    if img_format_num.isdigit() or int(img_format_num) > 2:
+        img_format_num = input("> Select number(0~2):")
+
+limit = input("> Enter limit:")
+while not limit:
+    limit = input("> Enter limit:")
+
+save_dir = input("> Enter save folder:")
+while not save_dir:
+    save_dir = input("> Enter save folder:")
+if not os.path.exists(save_dir):
+    os.mkdir("./" + save_dir + "/")
+
+
+def downloadImage():
+    response = google_images_download.googleimagesdownload()
+    argments = {
+        "keywords"         : keyword,
+        "format"           : img_format[int(img_format_num)],
+        "limit"            : limit,
+        "output_directory" : save_dir,
+        "no_directory"     : True
+    }
+    try:
+        response.download(argments)
+    except FileNotFoundError:
         argments = {
-            "keywords"         : keywords["search_word"],
-            "limit"            : keywords["number"],
-            "format"           : keywords["img_format"],
-            "output_directory" : keywords["output_dir"],
+            "keywords"         : keyword,
+            "format"           : img_format[int(img_format_num)],
+            "limit"            : limit,
+            "output_directory" : save_dir,
             "no_directory"     : True
         }
-        google.download(argments)
-
-    
-    def inputValues(self):
-        keywords = {}
-
-        search_word = input("> Enter keyword:")
-        while not search_word:
-            search_word = input("> Enter keyword:")
-
-        number = input("\n> Enter number:")
-        while not number:
-            number = input("\n> Enter number:")
-
-        print("\n> 0:jpg, 1:gif, 2:png")
-        img_format = ["jpg", "gif", "png"]
-        img_format_num = input("> Select format(0~2):")
-        while not img_format_num.isdigit() or int(img_format_num) > 2:
-            img_format_num = input("> Select format(0~2):")
-
-        output_dir = input("\n> Enter save folder:")
-        while not output_dir:
-            output_dir = input("> Enter save folder:")
-        if not os.path.exists(output_dir):
-            os.mkdir("./" + output_dir + "/")
-
-        keywords["search_word"] = search_word
-        keywords["number"]      = number
-        keywords["img_format"]  = img_format[int(img_format_num)]
-        keywords["output_dir"]  = output_dir
-
-        return keywords
-
-
-    def run(self):
-        keywords = self.inputValues()
-        self.getParams(keywords)
-
-
+        try:
+            response.download(argments)
+        except:
+            pass
 
 
 def main():
-    google_down = GoogleImageDownloader()
-    google_down.run()
+    downloadImage()
 
 if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        print("\n> Exit program")
-        sys.exit()
+    main()
