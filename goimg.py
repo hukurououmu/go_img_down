@@ -1,56 +1,44 @@
-import os
-from google_images_download import google_images_download
+from gid_joeclinton.google_images_download import google_images_download
 
 
-keyword = input("> Enter keyword:")
-while not keyword:
-    keyword = input("> Enter keyword:")
+def input_command():
 
-print("> 0:jpg, 1:gif, 2:png")
-img_format = ["jpg", "gif", "png"]
-img_format_num = input("> Select number(0~2):")
-while not img_format_num:
-    if img_format_num.isdigit() or int(img_format_num) > 2:
-        img_format_num = input("> Select number(0~2):")
+    keyword = input(">>> Enter keyword: ")
+    while not keyword:
+        keyword = input(">>> Enter keyword: ")
 
-limit = input("> Enter limit:")
-while not limit:
-    limit = input("> Enter limit:")
+    print("[format number] 0:jpg, 1:gif, 2:png")
+    img_format = ["jpg", "gif", "png"]
+    img_format_num = input(">>> Select format number(0~2): " )
+    while not img_format_num:
+        if img_format_num.isdigit() or int(img_format_num) > 2:
+            img_format_num = input(">>> Select format number(0~2): ")
 
-save_dir = input("> Enter save folder:")
-while not save_dir:
-    save_dir = input("> Enter save folder:")
-if not os.path.exists(save_dir):
-    os.mkdir("./" + save_dir + "/")
+    limit = input(">>> Enter limit: ")
+    while not limit:
+        limit = input(">>> Enter limit: ")
+
+    return keyword, img_format, img_format_num, limit
 
 
-def downloadImage():
-    response = google_images_download.googleimagesdownload()
+
+
+def download_images():
+    inputcommand = input_command()
+    res = google_images_download.googleimagesdownload()
     argments = {
-        "keywords"         : keyword,
-        "format"           : img_format[int(img_format_num)],
-        "limit"            : limit,
-        "output_directory" : save_dir,
-        "no_directory"     : True
+        "keywords"         : inputcommand[0],
+        "format"           : inputcommand[1][int(inputcommand[2])],
+        "limit"            : inputcommand[3],
     }
     try:
-        response.download(argments)
-    except FileNotFoundError:
-        argments = {
-            "keywords"         : keyword,
-            "format"           : img_format[int(img_format_num)],
-            "limit"            : limit,
-            "output_directory" : save_dir,
-            "no_directory"     : True
-        }
-        try:
-            response.download(argments)
-        except:
-            pass
+        res.download(argments)
+    except Exception as e:
+        raise e
 
 
 def main():
-    downloadImage()
+    download_images()
 
 if __name__ == "__main__":
     main()
