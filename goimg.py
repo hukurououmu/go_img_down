@@ -5,6 +5,7 @@ import requests
 from random import choice
 from colorama import Fore, init
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import ElementClickInterceptedException
@@ -15,7 +16,7 @@ RED = Fore.RED
 GREEN = Fore.GREEN
 RESET = Fore.RESET
 
-# 回避用のランダムなユーザーエージェントのリスト
+# ユーザーエージェントのリスト
 _user_agents = [
     "Mozilla/5.0 (X11; CrOS x86_64 8172.45.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.64 Safari/537.36",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36",
@@ -44,17 +45,17 @@ SEARCH_WORD = input("> Enter search word: ")  # 入力されたワードの画�
 while not SEARCH_WORD:
     SEARCH_WORD = input("> Enter search word: ")
 DOWNLOAD_LIMIT = int(input("> Enter download limit number: "))  # ダウンロード数の上限
-SAVE_DIR = "./GoogleCrawler/" + SEARCH_WORD + "/"  # 画像保存先フォルダ
+# 画像保存先フォルダ(入力したワードの名前のフォルダが作られそこに画像が保存される)
+SAVE_DIR = "./GoogleCrawler/" + SEARCH_WORD + "/"
 FILE_NAME = ""  # ファイル名の後ろに0から連番と拡張子がつけられる
-TIMEOUT = 60  # 要素の検索のタイムアウト 60秒
-ACCESS_WAIT = 1  # アクセスの間隔 1秒
+TIMEOUT = 30  # 要素の検索のタイムアウト 30秒
+ACCESS_WAIT = 3  # アクセスの間隔 3秒
 RETRY_NUM = 3  # リトライ回数
 
 # ヘッドレスモードでfirefoxを起動する
 options = Options()
 options.add_argument("--headless")
-driver = webdriver.Firefox(
-    executable_path="C://driver/gecko/geckodriver.exe", options=options)
+driver = webdriver.Firefox(options=options)
 
 # タイムアウト設定
 driver.implicitly_wait(TIMEOUT)
@@ -72,11 +73,10 @@ time_geturl = time.time()
 print("[+] Google画像検索ページ取得: ", f"{time_geturl - time_driver:.1f}s")
 
 # 画像のサムネイルを取得
-thumb_elems = driver.find_elements_by_css_selector("#islmp img")
+thumb_elems = driver.find_elements(By.CSS_SELECTOR, "#islmp img")
 thumb_alts = [thumb.get_attribute("alt") for thumb in thumb_elems]
-
 count = len(thumb_alts) - thumb_alts.count("")
-print(count)
+print("[+] サムネイル画像取得数: ", count)
 
 while count < DOWNLOAD_LIMIT:
     # ページの一番下までスクロールする
@@ -84,14 +84,14 @@ while count < DOWNLOAD_LIMIT:
     time.sleep(ACCESS_WAIT)
 
     # 画像のサムネイルを取得
-    thumb_elems = driver.find_elements_by_css_selector("#islmp img")
+    thumb_elems = driver.find_elements(By.CSS_SELECTOR, "#islmp img")
     thumb_alts = [thumb.get_attribute("alt") for thumb in thumb_elems]
 
     count = len(thumb_alts) - thumb_alts.count("")
-    print(count)
+    print("[+] サムネイル画像取得数: ", count)
 
 # サムネイルをクリックしたら表示される領域を取得する
-img_frame_elems = driver.find_element_by_id("islsp")
+img_frame_elems = driver.find_element(By.ID, "islsp")
 
 # 画像保存先フォルダの作成
 os.makedirs(SAVE_DIR, exist_ok=True)
@@ -139,7 +139,7 @@ def download_image(url, path, loop):
 # サムネイル画像取得時間
 time_thumnails = time.time()
 print("[+] サムネイル画像取得", f"{time_thumnails - time_geturl:.1f}s")
-print("-" * 115)
+print("-" * 50)
 print("[*] ダウンロード開始")
 
 # ダウンロード
@@ -168,8 +168,8 @@ for thumb_elem, thumb_alt in zip(thumb_elems, thumb_alts):
 
     alt = thumb_alt.replace("'", "\\'")
     try:
-        img_elem = img_frame_elems.find_element_by_css_selector(
-            f"img[alt=\'{alt}\']")
+        img_elem = img_frame_elems.find_element(
+            By.CSS_SELECTOR, f"img[alt=\'{alt}\']")
     except NoSuchElementException:
         print(RED + "[!] img要素探索エラー" + RESET)
         print(RED + "[!] キャンセル" + RESET)
@@ -218,7 +218,7 @@ for thumb_elem, thumb_alt in zip(thumb_elems, thumb_alts):
 
 time_end = time.time()
 print("[*] ダウンロード終了", f"{time_end - time_thumnails:.1f}s")
-print("-" * 115)
+print("-" * 50)
 total = time_end - time_start
 total_str = f"プログラム終了時間: {total:.1f}s({total/60:.2f}min)"
 count_str = f"画像ダウンロード数: {count}"
