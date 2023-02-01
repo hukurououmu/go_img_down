@@ -49,13 +49,14 @@ DOWNLOAD_LIMIT = int(input("> Enter download limit number: "))  # ダウンロ�
 SAVE_DIR = "./GoogleCrawler/" + SEARCH_WORD + "/"
 FILE_NAME = ""  # ファイル名の後ろに0から連番と拡張子がつけられる
 TIMEOUT = 30  # 要素の検索のタイムアウト 30秒
-ACCESS_WAIT = 3  # アクセスの間隔 3秒
+ACCESS_WAIT = 1  # アクセスの間隔 3秒
 RETRY_NUM = 3  # リトライ回数
 
 # ヘッドレスモードでfirefoxを起動する
 options = Options()
 options.add_argument("--headless")
-driver = webdriver.Firefox(options=options)
+driver = webdriver.Firefox(
+    executable_path="C:/driver/gecko/geckodriver.exe", options=options)
 
 # タイムアウト設定
 driver.implicitly_wait(TIMEOUT)
@@ -73,6 +74,7 @@ time_geturl = time.time()
 print("[+] Google画像検索ページ取得: ", f"{time_geturl - time_driver:.1f}s")
 
 # 画像のサムネイルを取得
+time.sleep(ACCESS_WAIT)
 thumb_elems = driver.find_elements(By.CSS_SELECTOR, "#islmp img")
 thumb_alts = [thumb.get_attribute("alt") for thumb in thumb_elems]
 count = len(thumb_alts) - thumb_alts.count("")
